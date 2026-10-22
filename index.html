@@ -1,0 +1,345 @@
+<!doctype html><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; media-src data: blob:; base-uri 'none'; form-action 'none'">
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Glow Shelf</title>
+<style>
+*{box-sizing:border-box}
+:root{--bg:#0b0b2b;--text:#fff;--sub:#c9c9ee;--accent:#00f5d4;--panel:#15153d;--ptext:#fff;--line:#ffffff33;--btn:#ff5fa2;--btntext:#16032a;--wall:inset 0 0 90px #a29bfe55}
+body[data-theme=wood]{--bg:#efdcbc;--text:#3a2412;--sub:#6b4a2d;--accent:#a8581f;--panel:#fbf1dd;--ptext:#3a2412;--line:#3a241233;--btn:#a8581f;--btntext:#fff;--wall:inset 0 0 80px #a8581f33}
+body[data-theme=museum]{--bg:#ecebe6;--text:#1d1d1f;--sub:#555;--accent:#1d1d1f;--panel:#fff;--ptext:#1d1d1f;--line:#00000022;--btn:#1d1d1f;--btntext:#fff;--wall:inset 0 0 60px #00000014}
+html,body{margin:0}
+body{background:var(--bg);color:var(--text);font-family:system-ui,"Hiragino Sans","Noto Sans JP",sans-serif;min-height:100vh;box-shadow:var(--wall);transition:background .4s,color .4s;line-height:1.5}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid #ffd166;outline-offset:2px}
+.wrap{max-width:980px;margin:0 auto;padding:16px 16px 60px}
+header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}
+.logo{font-weight:800;font-size:22px;letter-spacing:.5px;color:var(--accent);line-height:1}
+body[data-theme=neon] .logo{text-shadow:0 0 10px var(--accent),0 0 24px var(--accent)}
+.lang{display:flex;border:1px solid var(--line);border-radius:20px;overflow:hidden}
+.lang button{background:none;border:0;padding:6px 12px;font-size:13px;font-weight:600;opacity:.7}
+.lang button[aria-pressed=true]{background:var(--accent);color:var(--btntext);opacity:1}
+body[data-theme=neon] .lang button[aria-pressed=true]{color:#06061a}
+.tag{margin:4px 0 14px;color:var(--sub);font-size:14px}
+.themes{display:flex;gap:8px;margin-bottom:14px}
+.themes button{flex:1;padding:10px 4px;border-radius:12px;border:1px solid var(--line);background:transparent;font-size:13px;font-weight:600;transition:.2s}
+.themes button[aria-pressed=true]{background:var(--accent);color:var(--btntext);border-color:transparent;transform:translateY(-1px)}
+body[data-theme=neon] .themes button[aria-pressed=true]{color:#06061a;box-shadow:0 0 14px var(--accent)}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+h1{font-size:18px;margin:0}
+body[data-theme=neon] h1{color:var(--accent);text-shadow:0 0 10px var(--accent)}
+.btn{background:var(--btn);color:var(--btntext);border:0;border-radius:22px;padding:10px 18px;font-weight:700;font-size:14px}
+body[data-theme=neon] .btn.main{box-shadow:0 0 14px var(--btn)}
+.btn.ghost{background:transparent;color:var(--ptext);border:1px solid var(--line)}
+.btn.danger{background:#d63c4a;color:#fff}
+.btn:active{transform:scale(.97)}
+.shelf{margin-top:8px}
+.row{margin-bottom:26px}
+.slots{display:grid;gap:16px;padding:0 6px;align-items:end}
+.board{height:8px;border-radius:3px;margin-top:-1px}
+body[data-theme=neon] .board{background:#ff5fa2;box-shadow:0 0 14px #ff5fa2,0 0 30px #ff5fa288;animation:pulse 3.5s ease-in-out infinite}
+body[data-theme=wood] .board{height:14px;background:linear-gradient(#b9783a,#8a5326);box-shadow:0 6px 8px #0003}
+body[data-theme=museum] .board{height:3px;background:#1d1d1f33;box-shadow:0 8px 12px #0002}
+@keyframes pulse{50%{opacity:.7}}
+.frame,.addtile{display:flex;flex-direction:column;text-align:center;font-size:12px;padding:6px 6px 8px;position:relative;animation:pop .4s both;transition:transform .2s}
+.frame:hover{transform:translateY(-4px)}
+@keyframes pop{from{opacity:0;transform:translateY(8px) scale(.96)}}
+.pic{display:flex;align-items:center;justify-content:center;aspect-ratio:1;font-size:clamp(34px,9vw,52px);overflow:hidden;width:100%}
+.pic img{width:100%;height:100%;object-fit:cover;display:block}
+.cap{margin-top:6px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+body[data-theme=neon] .frame{background:#111;border:2px solid var(--c);box-shadow:0 0 14px var(--c),inset 0 0 8px #0008;color:#fff}
+body[data-theme=wood] .frame{background:#fff8e8;border:7px solid #8a5326;box-shadow:0 5px 8px #0004,inset 0 0 6px #0003;color:#3a2412}
+body[data-theme=wood] .frame::after{content:"";position:absolute;top:-4px;left:50%;width:10px;height:10px;margin-left:-5px;border-radius:50%;background:var(--c);box-shadow:0 1px 2px #0006}
+body[data-theme=museum] .frame{background:#fff;border:1px solid #1d1d1f;outline:7px solid #fff;box-shadow:0 0 0 8px #1d1d1f,0 12px 18px #0003;margin:8px;color:#1d1d1f}
+body[data-theme=museum] .frame .cap::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--c);margin-right:6px}
+.addtile{background:transparent;border:2px dashed var(--accent);color:var(--accent);justify-content:center;align-items:center;aspect-ratio:1;font-size:13px;font-weight:700;gap:4px}
+.addtile b{font-size:38px;line-height:1}
+body[data-theme=neon] .addtile{border-color:#ff5fa2;color:#ff5fa2}
+.hint{text-align:center;color:var(--sub);font-size:13px;margin-top:6px}
+.meta{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-top:22px;font-size:12px;color:var(--sub)}
+.link{background:none;border:0;text-decoration:underline;font-size:12px;color:var(--sub);padding:2px}
+.toast{position:fixed;left:50%;bottom:20px;transform:translate(-50%,30px);background:#222;color:#fff;padding:10px 16px;border-radius:20px;font-size:13px;opacity:0;pointer-events:none;transition:.3s;max-width:90vw;z-index:30;text-align:center}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.ov{position:fixed;inset:0;background:#000a;display:flex;align-items:center;justify-content:center;padding:14px;z-index:20}
+.ov[hidden]{display:none}
+.panel{background:var(--panel);color:var(--ptext);border-radius:18px;width:100%;max-width:420px;max-height:92vh;overflow:auto;padding:18px;border:1px solid var(--line);animation:pop .25s both}
+body[data-theme=neon] .panel{box-shadow:0 0 30px #a29bfe88}
+.panel h2{margin:0 0 12px;font-size:18px}
+.big{border-radius:12px;overflow:hidden;margin-bottom:12px;border:2px solid var(--c)}
+.big .pic{font-size:84px}
+.memo{white-space:pre-wrap;background:#00000012;border-radius:10px;padding:12px;font-size:14px;margin:0 0 14px}
+.acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.acts .btn{flex:1;min-width:90px}
+label.f{display:block;font-size:12px;font-weight:700;margin:12px 0 4px;opacity:.85}
+input[type=text],textarea{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px solid var(--line);background:#ffffff14;color:var(--ptext)}
+body[data-theme=museum] input[type=text],body[data-theme=museum] textarea,body[data-theme=wood] input[type=text],body[data-theme=wood] textarea{background:#fff}
+textarea{min-height:80px;resize:vertical}
+.emo,.sw{display:flex;gap:6px;flex-wrap:wrap}
+.emo button{width:42px;height:42px;font-size:22px;border-radius:10px;border:2px solid transparent;background:#00000014}
+.emo button[aria-pressed=true]{border-color:var(--accent)}
+.sw button{width:36px;height:36px;border-radius:50%;border:3px solid transparent;background:var(--c);box-shadow:0 0 8px var(--c)}
+.sw button[aria-pressed=true]{border-color:var(--ptext)}
+.prev{display:flex;gap:12px;align-items:center}
+.prev .pic{width:96px;border-radius:10px;border:2px solid var(--c);flex:none;font-size:42px}
+.filebtn{display:inline-block;position:relative}
+.filebtn input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%}
+.filebtn:focus-within span{outline:3px solid #ffd166;outline-offset:2px}
+@media(min-width:560px){.wrap{padding:28px 24px 60px}.logo{font-size:28px}h1{font-size:22px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body data-theme="neon">
+<div class="wrap">
+<header>
+  <div class="logo">Glow Shelf</div>
+  <div class="lang" data-demo="lang-switch" role="group" aria-label="Language">
+    <button type="button" data-lang="ja" data-demo="lang-ja">日本語</button>
+    <button type="button" data-lang="en" data-demo="lang-en">EN</button>
+  </div>
+</header>
+<p class="tag" data-i18n="tagline"></p>
+<div class="themes" role="group" data-i18n-aria="themeLabel">
+  <button type="button" data-theme="wood" data-demo="theme-wood"></button>
+  <button type="button" data-theme="neon" data-demo="theme-neon"></button>
+  <button type="button" data-theme="museum" data-demo="theme-museum"></button>
+</div>
+<div class="bar">
+  <h1 id="shelfTitle"></h1>
+  <button class="btn main" type="button" id="addBtn" data-demo="add-photo" data-i18n="addPhoto"></button>
+</div>
+<main class="shelf" id="shelf" data-demo="shelf"></main>
+<p class="hint" data-i18n="tapHint"></p>
+<div class="meta">
+  <span id="stats" data-demo="stats"></span>
+  <span><button class="link" type="button" id="resetBtn" data-demo="reset-samples" data-i18n="reset"></button></span>
+</div>
+</div>
+
+<div class="ov" id="ov" hidden><div class="panel" id="panel" role="dialog" aria-modal="true" data-demo="dialog"></div></div>
+<div class="toast" id="toast" role="status" aria-live="polite" data-demo="toast"></div>
+
+<script>
+const I18N={
+ja:{
+ title:"Glow Shelf",tagline:"推しを光らせる、わたしの棚",themeLabel:"棚のテーマ",
+ th_wood:"🪵 木の棚",th_neon:"🌃 ネオン",th_museum:"🏛 美術館",
+ shelf_neon:"✨ My Neon Shelf",shelf_wood:"🪵 わたしの木の棚",shelf_museum:"🏛 わたしの美術館",
+ addPhoto:"＋ 写真を追加",tapHint:"タップして思い出メモを見る",reset:"サンプルに戻す",
+ add:"追加",count:n=>`${n}個を展示中`,storage:k=>`保存容量 約${k}KB / 5,000KB`,
+ viewEdit:"編集",close:"閉じる",noMemo:"（メモはまだありません）",
+ newTitle:"新しい宝物",editTitle:"宝物を編集",photo:"写真",choosePhoto:"📷 写真をえらぶ",removePhoto:"写真をはずす",
+ emoji:"絵文字（写真がないとき）",name:"名前",namePh:"例：相棒ヘッドホン",memo:"思い出メモ",memoPh:"いつ、どこで、どんな気持ち？",
+ color:"光る色",save:"棚にかざる",cancel:"キャンセル",del:"削除",delSure:"もう一度タップで削除",
+ untitled:"名もなき宝物",saved:"棚にかざりました ✨",updated:"更新しました",deleted:"棚からはずしました",
+ full:"保存容量がいっぱいです。写真を減らしてください（今回はこの画面でのみ表示）",
+ imgErr:"画像を読み込めませんでした",resized:"写真を縮小して保存しました",resetDone:"サンプルの棚に戻しました",
+ colors:{"#00f5d4":"ミント","#ff5fa2":"ピンク","#a29bfe":"パープル","#ffd166":"イエロー"},
+ sample:{
+  s1:["相棒ヘッドホン","ライブの前には必ずこれ。音がいちばん好きな一台。"],
+  s2:["宝物のくま","初めてクレーンゲームで取れた景品。部屋の守り神。"],
+  s3:["初参戦のライブ","手が震えた初めての現場。チケットの半券も大切に保管中。"],
+  s4:["クリア記念","徹夜でラスボスを倒した日。エンディングで少し泣いた。"],
+  s5:["お花見の日","みんなで見た桜。お団子がおいしかった。"]}
+},
+en:{
+ title:"Glow Shelf",tagline:"Make your favorites glow on your own shelf.",themeLabel:"Shelf theme",
+ th_wood:"🪵 Wood",th_neon:"🌃 Neon",th_museum:"🏛 Museum",
+ shelf_neon:"✨ My Neon Shelf",shelf_wood:"🪵 My Wooden Shelf",shelf_museum:"🏛 My Museum",
+ addPhoto:"＋ Add photo",tapHint:"Tap a frame to read its memory note",reset:"Reset to samples",
+ add:"Add",count:n=>`${n} item${n==1?"":"s"} on display`,storage:k=>`Storage: about ${k} KB of 5,000 KB`,
+ viewEdit:"Edit",close:"Close",noMemo:"(No note yet)",
+ newTitle:"New treasure",editTitle:"Edit treasure",photo:"Photo",choosePhoto:"📷 Choose photo",removePhoto:"Remove photo",
+ emoji:"Emoji (when there is no photo)",name:"Name",namePh:"e.g. My trusty headphones",memo:"Memory note",memoPh:"When, where, how did it feel?",
+ color:"Glow color",save:"Put on shelf",cancel:"Cancel",del:"Delete",delSure:"Tap again to delete",
+ untitled:"Untitled treasure",saved:"Added to your shelf ✨",updated:"Updated",deleted:"Removed from your shelf",
+ full:"Storage is full. Try removing some photos (this one is shown on this screen only).",
+ imgErr:"Could not read that image",resized:"Photo was shrunk and saved",resetDone:"Shelf reset to the samples",
+ colors:{"#00f5d4":"Mint","#ff5fa2":"Pink","#a29bfe":"Purple","#ffd166":"Yellow"},
+ sample:{
+  s1:["My trusty headphones","I always wear them before a live show. My favorite sound."],
+  s2:["Treasure bear","The first prize I ever won at a claw machine. My room's guardian."],
+  s3:["First live show","My hands were shaking. I still keep the ticket stub."],
+  s4:["Game cleared!","The night I beat the final boss. I cried a little at the ending."],
+  s5:["Cherry blossom day","Viewing the blossoms with friends. The dango was so good."]}
+}};
+const COLORS=["#00f5d4","#ff5fa2","#a29bfe","#ffd166"];
+const EMOJIS=["🧸","🎧","📷","🎮","📚","🌸","🎤","💿","🍰","🎫","⭐","🧁"];
+const SAMPLES=()=>[
+ {id:"s1",sk:"s1",emoji:"🎧",c:"#00f5d4"},
+ {id:"s2",sk:"s2",emoji:"🧸",c:"#ff5fa2"},
+ {id:"s3",sk:"s3",emoji:"🎤",c:"#a29bfe"},
+ {id:"s4",sk:"s4",emoji:"🎮",c:"#ffd166"},
+ {id:"s5",sk:"s5",emoji:"🌸",c:"#ff5fa2"}];
+const $=s=>document.querySelector(s);
+let lang="en",theme="neon",items=[],modal=null,delArmed=false,lastFocus=null,toastT;
+
+function startLang(){
+ if(window.APP_LANG==="ja"||window.APP_LANG==="en")return window.APP_LANG;
+ try{const q=new URLSearchParams(location.search).get("lang");if(q==="ja"||q==="en")return q}catch(e){}
+ try{const s=localStorage.getItem("lang");if(s==="ja"||s==="en")return s}catch(e){}
+ return "en";
+}
+const T=k=>I18N[lang][k];
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function titleOf(i){return i.sk?I18N[lang].sample[i.sk][0]:(i.t||T("untitled"))}
+function memoOf(i){return i.sk?I18N[lang].sample[i.sk][1]:(i.m||"")}
+
+function load(){
+ try{const r=localStorage.getItem("glowshelf.items");if(r){const a=JSON.parse(r);if(Array.isArray(a))items=a;else items=SAMPLES()}else items=SAMPLES()}catch(e){items=SAMPLES()}
+ try{const t=localStorage.getItem("glowshelf.theme");if(t==="wood"||t==="neon"||t==="museum")theme=t}catch(e){}
+}
+function save(){
+ try{localStorage.setItem("glowshelf.items",JSON.stringify(items));return true}
+ catch(e){toast(T("full"));return false}
+}
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove("show"),2600)}
+
+function cols(){const w=$("#shelf").clientWidth||360;return w<520?2:w<820?3:4}
+function picHTML(i){
+ const bg=`linear-gradient(135deg,${i.c}66,${i.c}18)`;
+ return `<span class="pic" style="background:${bg}">${i.photo?`<img src="${i.photo}" alt="">`:esc(i.emoji||"⭐")}</span>`;
+}
+function renderShelf(){
+ const n=cols();
+ const tiles=items.map((i,k)=>`<button type="button" class="frame" style="--c:${i.c};animation-delay:${k*50}ms" data-id="${i.id}" data-demo="frame-${i.id}" aria-label="${esc(titleOf(i))}">${picHTML(i)}<span class="cap">${esc(titleOf(i))}</span></button>`);
+ tiles.push(`<button type="button" class="addtile" data-demo="add-tile" data-add="1" aria-label="${esc(T("addPhoto"))}"><b>＋</b><span>${esc(T("add"))}</span></button>`);
+ let h="";
+ for(let r=0;r<tiles.length;r+=n){
+  h+=`<div class="row"><div class="slots" style="grid-template-columns:repeat(${n},1fr)">${tiles.slice(r,r+n).join("")}</div><div class="board"></div></div>`;
+ }
+ $("#shelf").innerHTML=h;
+ $("#shelfTitle").textContent=T("shelf_"+theme);
+ let k=0;try{k=Math.round(JSON.stringify(items).length/1024)}catch(e){}
+ $("#stats").textContent=T("count")(items.length)+" ・ "+T("storage")(k);
+}
+
+function applyLang(){
+ document.documentElement.lang=lang;
+ document.title=T("title");
+ document.querySelectorAll("[data-i18n]").forEach(e=>e.textContent=T(e.dataset.i18n));
+ document.querySelectorAll("[data-i18n-aria]").forEach(e=>e.setAttribute("aria-label",T(e.dataset.i18nAria)));
+ document.querySelectorAll(".lang button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.lang===lang));
+ document.querySelectorAll(".themes button").forEach(b=>{b.textContent=T("th_"+b.dataset.theme);b.setAttribute("aria-pressed",b.dataset.theme===theme)});
+ renderShelf();renderModal();
+}
+function setTheme(t){
+ theme=t;document.body.dataset.theme=t;
+ try{localStorage.setItem("glowshelf.theme",t)}catch(e){}
+ applyLang();
+}
+
+/* modal */
+function openModal(m){lastFocus=document.activeElement;modal=m;delArmed=false;$("#ov").hidden=false;renderModal();const f=$("#panel").querySelector("[data-first]");if(f)f.focus()}
+function closeModal(){modal=null;$("#ov").hidden=true;if(lastFocus&&lastFocus.focus)try{lastFocus.focus()}catch(e){}}
+function openView(id){openModal({mode:"view",id})}
+function openEdit(id){
+ const i=id?items.find(x=>x.id===id):null;
+ openModal({mode:"edit",id:id||null,t:i?titleOf(i):"",m:i?memoOf(i):"",emoji:i?i.emoji:"🧸",c:i?i.c:COLORS[0],photo:i?i.photo||"":""});
+}
+function renderModal(){
+ const p=$("#panel");
+ if(!modal){p.innerHTML="";return}
+ if(modal.mode==="view"){
+  const i=items.find(x=>x.id===modal.id);if(!i){closeModal();return}
+  const memo=memoOf(i);
+  p.setAttribute("aria-label",titleOf(i));
+  p.innerHTML=`<div class="big" style="--c:${i.c}" data-demo="view-photo">${picHTML(i)}</div>
+  <h2>${esc(titleOf(i))}</h2>
+  <p class="memo" data-demo="view-memo">${memo?esc(memo):esc(T("noMemo"))}</p>
+  <div class="acts"><button class="btn ghost" type="button" data-act="close" data-first data-demo="view-close">${esc(T("close"))}</button><button class="btn" type="button" data-act="edit" data-demo="view-edit">${esc(T("viewEdit"))}</button></div>`;
+  return;
+ }
+ const m=modal;
+ p.setAttribute("aria-label",T(m.id?"editTitle":"newTitle"));
+ const pic=`<span class="pic" style="background:linear-gradient(135deg,${m.c}66,${m.c}18)">${m.photo?`<img src="${m.photo}" alt="">`:esc(m.emoji)}</span>`;
+ p.innerHTML=`<h2>${esc(T(m.id?"editTitle":"newTitle"))}</h2>
+ <label class="f">${esc(T("photo"))}</label>
+ <div class="prev" style="--c:${m.c}" data-demo="edit-preview">${pic}
+  <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start">
+   <label class="filebtn"><span class="btn" style="display:inline-block">${esc(T("choosePhoto"))}</span><input type="file" accept="image/*" id="file" data-first data-demo="photo-input" aria-label="${esc(T("choosePhoto"))}"></label>
+   ${m.photo?`<button class="btn ghost" type="button" data-act="rmphoto" data-demo="remove-photo">${esc(T("removePhoto"))}</button>`:""}
+  </div></div>
+ ${m.photo?"":`<label class="f">${esc(T("emoji"))}</label><div class="emo" data-demo="emoji-picker">${EMOJIS.map(e=>`<button type="button" data-emoji="${e}" aria-pressed="${e===m.emoji}" data-demo="emoji-${EMOJIS.indexOf(e)}">${e}</button>`).join("")}</div>`}
+ <label class="f" for="fTitle">${esc(T("name"))}</label>
+ <input type="text" id="fTitle" maxlength="40" value="${esc(m.t)}" placeholder="${esc(T("namePh"))}" data-demo="title-input">
+ <label class="f" for="fMemo">${esc(T("memo"))}</label>
+ <textarea id="fMemo" maxlength="400" placeholder="${esc(T("memoPh"))}" data-demo="memo-input">${esc(m.m)}</textarea>
+ <label class="f">${esc(T("color"))}</label>
+ <div class="sw" data-demo="color-picker">${COLORS.map((c,k)=>`<button type="button" style="--c:${c}" data-color="${c}" aria-pressed="${c===m.c}" aria-label="${esc(I18N[lang].colors[c])}" data-demo="color-${k}"></button>`).join("")}</div>
+ <div class="acts"><button class="btn ghost" type="button" data-act="cancel" data-demo="edit-cancel">${esc(T("cancel"))}</button>
+ ${m.id?`<button class="btn danger" type="button" data-act="del" data-demo="delete-item">${esc(T(delArmed?"delSure":"del"))}</button>`:""}
+ <button class="btn main" type="button" data-act="save" data-demo="save-item">${esc(T("save"))}</button></div>`;
+}
+function syncFields(){
+ if(!modal||modal.mode!=="edit")return;
+ const a=$("#fTitle"),b=$("#fMemo");
+ if(a)modal.t=a.value;if(b)modal.m=b.value;
+}
+function shrink(file){
+ const rd=new FileReader();
+ rd.onerror=()=>toast(T("imgErr"));
+ rd.onload=()=>{
+  const img=new Image();
+  img.onerror=()=>toast(T("imgErr"));
+  img.onload=()=>{
+   const M=480,s=Math.min(1,M/Math.max(img.width,img.height));
+   const cv=document.createElement("canvas");cv.width=Math.round(img.width*s);cv.height=Math.round(img.height*s);
+   cv.getContext("2d").drawImage(img,0,0,cv.width,cv.height);
+   syncFields();modal.photo=cv.toDataURL("image/jpeg",0.78);renderModal();toast(T("resized"));
+  };
+  img.src=rd.result;
+ };
+ rd.readAsDataURL(file);
+}
+function commit(){
+ syncFields();
+ const m=modal,title=m.t.trim(),memo=m.m.trim();
+ if(m.id){
+  const i=items.find(x=>x.id===m.id);
+  delete i.sk;i.t=title||T("untitled");i.m=memo;i.emoji=m.emoji;i.c=m.c;i.photo=m.photo;
+  toast(T("updated"));
+ }else{
+  items.push({id:"u"+Date.now().toString(36),t:title||T("untitled"),m:memo,emoji:m.emoji,c:m.c,photo:m.photo});
+  toast(T("saved"));
+ }
+ save();closeModal();renderShelf();
+}
+
+/* events */
+$("#panel").addEventListener("click",e=>{
+ const b=e.target.closest("button");if(!b)return;
+ if(b.dataset.emoji){syncFields();modal.emoji=b.dataset.emoji;renderModal();return}
+ if(b.dataset.color){syncFields();modal.c=b.dataset.color;renderModal();return}
+ const a=b.dataset.act;
+ if(a==="close"||a==="cancel")closeModal();
+ else if(a==="edit"){const id=modal.id;modal=null;openEditKeep(id)}
+ else if(a==="rmphoto"){syncFields();modal.photo="";renderModal()}
+ else if(a==="save")commit();
+ else if(a==="del"){
+  if(!delArmed){syncFields();delArmed=true;renderModal();return}
+  items=items.filter(x=>x.id!==modal.id);save();closeModal();renderShelf();toast(T("deleted"));
+ }
+});
+function openEditKeep(id){const i=items.find(x=>x.id===id);modal={mode:"edit",id,t:titleOf(i),m:memoOf(i),emoji:i.emoji,c:i.c,photo:i.photo||""};delArmed=false;renderModal();const f=$("#panel").querySelector("[data-first]");if(f)f.focus()}
+$("#panel").addEventListener("change",e=>{if(e.target.id==="file"&&e.target.files[0])shrink(e.target.files[0])});
+$("#ov").addEventListener("click",e=>{if(e.target.id==="ov")closeModal()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&modal)closeModal()});
+$("#shelf").addEventListener("click",e=>{
+ const b=e.target.closest("button");if(!b)return;
+ if(b.dataset.add)openEdit(null);else if(b.dataset.id)openView(b.dataset.id);
+});
+$("#addBtn").addEventListener("click",()=>openEdit(null));
+$("#resetBtn").addEventListener("click",()=>{items=SAMPLES();save();renderShelf();toast(T("resetDone"))});
+document.querySelectorAll(".themes button").forEach(b=>b.addEventListener("click",()=>setTheme(b.dataset.theme)));
+document.querySelectorAll(".lang button").forEach(b=>b.addEventListener("click",()=>{
+ syncFields();lang=b.dataset.lang;
+ try{localStorage.setItem("lang",lang)}catch(e){}
+ applyLang();
+}));
+let rt;window.addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(renderShelf,120)});
+
+lang=startLang();load();document.body.dataset.theme=theme;applyLang();
+</script>
+</body>
+</html>
